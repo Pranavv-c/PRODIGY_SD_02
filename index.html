@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Number Guessing Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      background: rgb(242, 6, 6);
+      padding: 60px 40px;
+      border-radius: 70px;
+      box-shadow: 0 8px 18px rgb(15, 14, 14);
+      text-align: center;
+      width: 320px;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    input, button, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background: #f9f936;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background: #16e45b;
+    }
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #0a0808;
+    }
+    .controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-size: 14px;
+    }
+    .controls select, .controls button {
+      margin: 5px 0;
+      width: 100%;
+      font-size: 14px;
+      padding: 6px;
+    }
+    .dark-mode {
+      background: #121212;
+      color: #f4f4f4;
+    }
+    .dark-mode .container {
+      background: #1e1e1e;
+      color: #f4f4f4;
+    }
+    .theme-red { background: #ffe5e5; }
+    .theme-green { background: #e5ffe5; }
+    .theme-blue { background: #e5f0ff; }
+  </style>
+</head>
+<body>
+      <!-- Control Panel (Top Right) -->
+  <div class="controls">
+    <label>Theme:</label>
+    <select id="theme" onchange="setTheme()">
+      <option value="">Default</option>
+      <option value="theme-red">Red</option>
+      <option value="theme-green">Green</option>
+      <option value="theme-blue">Blue</option>
+    </select> 
+  </div>
+
+  <div class="container">
+    <h2>🎲 Number Guessing Game</h2>
+    <p>I'm thinking of a number...</p>
+
+    <!-- Difficulty -->
+    <label>Choose Difficulty:</label>
+    <select id="difficulty" onchange="setDifficulty()">
+      <option value="100">Easy (1-100)</option>
+      <option value="500">Medium (1-500)</option>
+      <option value="1000">Hard (1-1000)</option>
+    </select>
+
+    <!-- Guess input -->
+    <input type="number" id="guess" placeholder="Enter your guess">
+    <button onclick="checkGuess()">Submit Guess</button>
+    <div class="result" id="result"></div>
+
+    <!-- Restart -->
+    <button onclick="restartGame()">Restart Game</button>
+
+    <!-- Scoreboard -->
+    <p id="scoreboard">🏆 Best Score: -- attempts</p>
+
+    <!-- Timer -->
+    <p id="timer">⏱️ Time: 0s</p>
+   
+  <script>
+    let num, tries, bestScore = localStorage.getItem("bestScore") || null;
+    let timerInterval, seconds = 0;
+    let maxRange = 100;
+
+    function setDifficulty() {
+      maxRange = parseInt(document.getElementById("difficulty").value);
+      restartGame();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      seconds = 0;
+      document.getElementById("timer").innerText = "⏱️ Time: 0s";
+      timerInterval = setInterval(() => {
+        seconds++;
+        document.getElementById("timer").innerText = `⏱️ Time: ${seconds}s`;
+      }, 1000);
+    }
+
+    function restartGame() {
+      num = Math.floor(Math.random() * maxRange) + 1;
+      tries = 0;
+      document.getElementById("result").innerText = "Game restarted! Guess a new number.";
+      document.getElementById("guess").value = "";
+      startTimer();
+    }
+
+    function checkGuess() {
+      let guess = parseInt(document.getElementById("guess").value);
+      let result = document.getElementById("result");
+      tries++;
+
+      if (isNaN(guess)) {
+        result.innerText = "⚠️ Please enter a valid number!";
+      } else if (guess < num) {
+        result.innerText = "Too low! Try again.";
+      } else if (guess > num) {
+        result.innerText = "Too high! Try again.";
+      } else {
+        clearInterval(timerInterval);
+        result.innerText = `🎉 Correct! Number ${num} in ${tries} attempts and ${seconds}s.`;
+
+        if (!bestScore || tries < bestScore) {
+          bestScore = tries;
+          localStorage.setItem("bestScore", bestScore);
+        }
+        document.getElementById("scoreboard").innerText = `🏆 Best Score: ${bestScore} attempts`;
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+
+    function setTheme() {
+      document.body.classList.remove("theme-red", "theme-green", "theme-blue");
+      let theme = document.getElementById("theme").value;
+      if (theme) document.body.classList.add(theme);
+    }
+
+    // Initialize
+    restartGame();
+    if (bestScore) {
+      document.getElementById("scoreboard").innerText = `🏆 Best Score: ${bestScore} attempts`;
+    }
+  </script>
+</body>
+</html>
